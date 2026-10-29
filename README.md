@@ -1,6 +1,11 @@
 # Telegram for Cursor
 
-Cursor plugin with **two** MCP servers so agents (including Grok) can use Telegram as a **bot** and/or your **personal account**.
+Cursor plugin with **two** MCP servers so agents can use Telegram as a **bot** and/or your **personal account**.
+
+Works with:
+
+- **Cursor** — local **stdio** via [`mcp.json`](mcp.json) (default; unchanged)
+- **Grok Bot app** — self-hosted **Streamable HTTP** ([`docs/grok-bot.md`](docs/grok-bot.md), Docker)
 
 | Server | Identity | Auth |
 | --- | --- | --- |
@@ -54,6 +59,18 @@ node scripts/validate-template.mjs
 CI: `.github/workflows/ci.yml`.
 
 Optional inbound worker scaffold: [`bridge/`](bridge/).
+
+## Grok Bot (self-host)
+
+Cursor stdio is separate. To use the **same tools** from the Grok Bot app, run HTTP and expose HTTPS:
+
+```bash
+cd mcp && npm run build
+MCP_AUTH_TOKEN=… MCP_MODE=bot npm run start:http
+# or: docker compose up -d --build
+```
+
+Then in Grok Bot: add custom MCP `https://YOUR-HOST/mcp/bot` with your bearer token. Full guide: [`docs/grok-bot.md`](docs/grok-bot.md).
 
 ## Security
 

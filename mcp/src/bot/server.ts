@@ -26,7 +26,7 @@ function nextOffset(updates: TelegramUpdate[]): number | undefined {
   return Math.max(...updates.map((u) => u.update_id)) + 1;
 }
 
-export async function runBotServer() {
+export function createBotMcpServer(): McpServer {
   const server = new McpServer({
     name: "telegram-bot",
     version: "0.1.0",
@@ -576,6 +576,11 @@ export async function runBotServer() {
     }
   );
 
+  return server;
+}
+
+export async function runBotServer() {
+  const server = createBotMcpServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }

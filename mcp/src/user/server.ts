@@ -53,7 +53,7 @@ const waitFlood = z
   .optional()
   .describe("Auto-wait up to 60s on FloodWait and retry once");
 
-export async function runUserServer() {
+export function createUserMcpServer(): McpServer {
   const server = new McpServer({
     name: "telegram-user",
     version: "0.1.0",
@@ -671,6 +671,11 @@ export async function runUserServer() {
     }
   );
 
+  return server;
+}
+
+export async function runUserServer() {
+  const server = createUserMcpServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }

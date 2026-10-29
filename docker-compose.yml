@@ -1,0 +1,19 @@
+# Self-host for Grok Bot (HTTP). Does not replace Cursor stdio mcp.json.
+#
+#   cp .env.example .env   # set TELEGRAM_* and MCP_AUTH_TOKEN
+#   docker compose up -d --build
+#   # expose https://your-host/mcp/bot to Grok Bot
+
+services:
+  telegram-mcp:
+    build: .
+    ports:
+      - "${PORT:-8787}:8787"
+    env_file:
+      - .env
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "8787"
+      MCP_MODE: "${MCP_MODE:-bot}"
+      NODE_ENV: production
+    restart: unless-stopped

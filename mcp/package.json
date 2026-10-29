@@ -1,7 +1,7 @@
 {
   "name": "cursor-telegram-mcp",
   "version": "0.1.0",
-  "description": "MCP servers for Telegram Bot API and personal user account (MTProto)",
+  "description": "MCP servers for Telegram Bot API and personal user account — stdio for Cursor, Streamable HTTP for Grok Bot / self-host",
   "type": "module",
   "bin": {
     "cursor-telegram-mcp": "./dist/cli.js"
@@ -15,8 +15,9 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/cli.js",
+    "start:http": "node dist/cli.js http",
     "smoke": "node scripts/smoke-list-tools.mjs",
-    "test": "npm run build && node --test test/**/*.test.mjs scripts/smoke-list-tools.mjs",
+    "test": "npm run build && node --test test/**/*.test.mjs scripts/smoke-list-tools.mjs scripts/smoke-http.mjs",
     "prepublishOnly": "npm run build"
   },
   "engines": {
@@ -31,15 +32,18 @@
     "mcp",
     "telegram",
     "cursor",
+    "grok",
     "bot",
     "mtproto"
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.0",
+    "express": "^5.2.1",
     "teleproto": "^1.232.0",
     "zod": "^3.25.0"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/node": "^22.15.0",
     "typescript": "^5.8.0"
   }
