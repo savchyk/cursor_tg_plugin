@@ -132,7 +132,20 @@ export async function runHttpServer(opts: HttpOptions = {}) {
     );
   }
 
-  const app = createMcpExpressApp({ host });
+  // Public hostnames come from MCP_ALLOWED_HOSTS (set in infra), never hardcoded.
+  const allowedHosts = (
+    process.env.MCP_ALLOWED_HOSTS?.split(",")
+      .map((h) => h.trim())
+      .filter(Boolean) ?? []
+  );
+  if ((host === "0.0.0.0" || host === "::") && allowedHosts.length === 0) {
+    allowedHosts.push("localhost", "127.0.0.1");
+  }
+
+  const app = createMcpExpressApp({
+    host,
+    ...(allowedHosts.length ? { allowedHosts } : {}),
+  });
 
   app.get("/health", (_req, res) => {
     res.json({
