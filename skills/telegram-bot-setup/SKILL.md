@@ -1,26 +1,31 @@
 ---
 name: telegram-bot-setup
-description: Set up Telegram Bot API access for the telegram-bot MCP server. Use when configuring TELEGRAM_BOT_TOKEN, BotFather, or smoke-testing the bot.
+description: Set up Telegram Bot API access for the telegram-bot MCP server. Use when configuring TELEGRAM_BOT_TOKEN, BotFather, webhooks, or smoke-testing the bot.
 ---
 
 # Telegram bot setup
 
+## Credential sources (priority)
+
+1. Project `.env` with `TELEGRAM_BOT_TOKEN=…` (loaded via `mcp.json` `envFile`)
+2. Cursor MCP / plugin env UI
+3. Shell export (GUI Cursor often **misses** this)
+4. Home file via tool `save_bot_token` → `~/.cursor-telegram/bot-token`
+5. Named bots: `TELEGRAM_BOT_<NAME>=token` (use tool arg `bot`)
+
 ## Steps
 
-1. Open Telegram and chat with [@BotFather](https://t.me/BotFather).
-2. Run `/newbot` (or `/token` for an existing bot) and copy the token.
-3. Export it in the environment Cursor uses:
+1. Chat with [@BotFather](https://t.me/BotFather) → `/newbot` or `/token`.
+2. Put the token in `.env` (copy from `.env.example`) **or** call `save_bot_token`.
+3. Reload MCP in Cursor.
+4. Call `list_bots` then `get_me`.
+5. If updates fail: `get_webhook_info` → `delete_webhook` if a webhook is set.
+6. Message the bot, then `list_recent_chats` / `get_updates` for `chat_id`.
 
-```bash
-export TELEGRAM_BOT_TOKEN="123456:ABC..."
-```
+## Troubleshooting: Cursor can’t see my token
 
-4. Restart MCP / reload the window so `telegram-bot` picks up the env.
-5. Smoke-test with the MCP tool `get_me` on server `telegram-bot`. You should see `is_bot: true` and a username.
-6. Message the bot from Telegram, then call `get_updates` or `list_recent_chats` to discover `chat_id`.
-
-## Notes
-
-- Do not commit the token. Prefer shell env or a local secret store.
-- The bot can only see chats it participates in and updates it receives.
-- For personal inbox access, use `telegram-user` instead (see telegram-user-setup).
+1. Create `.env` in the workspace from `.env.example`.
+2. Confirm `mcp.json` has `"envFile": "${workspaceFolder}/.env"`.
+3. Fully quit and reopen Cursor (not only reload window).
+4. Call `list_bots` — if empty, the server still has no token.
+5. As a fallback, use `save_bot_token` (home store) and reload MCP.

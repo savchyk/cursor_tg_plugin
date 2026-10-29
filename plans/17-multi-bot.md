@@ -1,24 +1,34 @@
 # 17 — Multi-bot Bot API support
 
+**Status: Done**
+
 ## Goal
 
-Manage multiple BotFather bots from one `telegram-bot` MCP server (e.g. `alerts`, `sales`).
+Multiple BotFather bots from one `telegram-bot` MCP server.
 
-## Approach
+## Implemented
 
-1. Env convention: `TELEGRAM_BOT_<NAME>=token` (plus optional legacy `TELEGRAM_BOT_TOKEN` as `default`).
-2. Every bot tool gains optional `bot` string arg (default `default`).
-3. Add `list_bots` — calls `getMe` per configured token (mask tokens in output).
-4. Update skills/README for multi-bot routing.
-5. Keep single-token setup working unchanged.
+| Item | Detail |
+| --- | --- |
+| Env | `TELEGRAM_BOT_TOKEN` → name `default`; `TELEGRAM_BOT_<NAME>=token` |
+| Home fallback | `~/.cursor-telegram/bot-token` as `default` |
+| Registry | [`mcp/src/bot/tokens.ts`](../mcp/src/bot/tokens.ts) |
+| `list_bots` | Masked tokens + optional `getMe` probe |
+| `bot` arg | On bot tools (`get_me`, send*, updates, etc.) |
+| Docs | `.env.example`, bot setup skill, README |
+
+Single-token setups unchanged (`default`).
 
 ## Acceptance
 
-- Two tokens in env → `list_bots` shows two usernames; `send_message` with `bot: "alerts"` uses the right token.
+- [x] Named bots via env
+- [x] `list_bots` + `bot` routing
+- [x] Skills/README
+- [x] Covered indirectly via bot-api unit tests + smoke `list_bots`
 
 ## Todos
 
-- [ ] Token registry from env
-- [ ] `bot` param on all bot tools + `list_bots`
-- [ ] Skills/README
-- [ ] Tests with mocked fetch per bot
+- [x] Token registry from env
+- [x] `bot` param on bot tools + `list_bots`
+- [x] Skills/README
+- [x] Tests with mocked fetch (default bot path)

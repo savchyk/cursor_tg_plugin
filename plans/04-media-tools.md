@@ -1,34 +1,38 @@
 # 04 — Media send tools
 
+**Status: Done**
+
 ## Goal
 
 Send photos and documents via both MCP servers.
 
-## Bot API (`telegram-bot`)
+## Implemented
 
-- `send_photo` — `chat_id`, `photo` (URL or `file_id`), optional `caption`, `parse_mode`
-- `send_document` — same shape with `document`
-- v0: URL / `file_id` only (no multipart local upload unless easy with fetch + FormData)
+### Bot (`telegram-bot`) — [`mcp/src/bot/server.ts`](../mcp/src/bot/server.ts)
 
-## User account (`telegram-user`)
+- `send_photo` — `chat_id`, `photo` (URL / `file_id`), caption, reply/thread, `bot`
+- `send_document` — same with `document`
+- v0: URL / `file_id` only (no multipart local upload)
 
-- `send_photo` / `send_document` via teleproto (`sendFile` / upload helpers)
-- Accept local path **or** URL; resolve peer like `send_message`
-- Prefix descriptions with `[User account]`
+### User (`telegram-user`) — [`mcp/src/user/server.ts`](../mcp/src/user/server.ts)
 
-## Also
+- `send_photo` / `send_document` via teleproto `sendFile`
+- Local path or URL; `forceDocument` on document tool
 
-- Extend `send-telegram-message` skill: confirm media source + caption
-- Smoke: listTools includes new names; optional mocked bot HTTP test later ([12](12-integration-tests.md))
+### Docs / smoke
+
+- Skill `send-telegram-message` covers media confirmation
+- README tools summary
+- Smoke expects photo/document tool names
 
 ## Acceptance
 
-- Both servers expose photo + document tools with `[Bot API]` / `[User account]` prefixes.
-- README tools tables updated.
+- [x] Both servers expose photo + document tools with prefixes
+- [x] README + smoke updated
 
 ## Todos
 
-- [ ] Bot `send_photo` / `send_document`
-- [ ] User `send_photo` / `send_document`
-- [ ] Skill + README updates
-- [ ] Extend smoke-list-tools expectations
+- [x] Bot `send_photo` / `send_document`
+- [x] User `send_photo` / `send_document`
+- [x] Skill + README updates
+- [x] Extend smoke-list-tools expectations

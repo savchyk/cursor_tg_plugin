@@ -1,58 +1,37 @@
 # 02 — npm publish + portable mcp.json
 
+**Status: Prep only** — package ready; **not published** (needs `npm login`)
+
 ## Goal
 
-Install the MCP servers anywhere via `npx`, not only inside this workspace’s `mcp/dist`.
+Install MCP servers anywhere via `npx`, not only inside this workspace’s `mcp/dist`.
 
-## Why
+## Implemented (prep)
 
-Marketplace / other projects need a package name. Current [`mcp.json`](../mcp.json) hard-codes `${workspaceFolder}/mcp/dist/cli.js`.
+| Item | Location |
+| --- | --- |
+| Package metadata, `bin`, `files`, `prepublishOnly` | [`mcp/package.json`](../mcp/package.json) |
+| Package README | [`mcp/README.md`](../mcp/README.md) |
+| npx config example | [`mcp.json.npx.example`](../mcp.json.npx.example) |
+| Dev still uses local dist | [`mcp.json`](../mcp.json) → `node …/mcp/dist/cli.js` |
 
-## Approach
+## Remaining
 
-1. Finalize [`mcp/package.json`](../mcp/package.json): name `cursor-telegram-mcp`, `bin`, `files` (`dist/**`), `engines`, license, repository URL.
-2. Ensure `npm run build` is required before publish; add `"prepublishOnly": "npm run build"`.
-3. Publish to npm (user must be logged in: `npm publish --access public`).
-4. Change root `mcp.json` to:
-
-```json
-{
-  "mcpServers": {
-    "telegram-bot": {
-      "command": "npx",
-      "args": ["-y", "cursor-telegram-mcp@0.1.0", "bot"],
-      "envFile": "${workspaceFolder}/.env",
-      "env": { "TELEGRAM_BOT_TOKEN": "${env:TELEGRAM_BOT_TOKEN}" }
-    },
-    "telegram-user": {
-      "command": "npx",
-      "args": ["-y", "cursor-telegram-mcp@0.1.0", "user"],
-      "envFile": "${workspaceFolder}/.env",
-      "env": {
-        "TELEGRAM_API_ID": "${env:TELEGRAM_API_ID}",
-        "TELEGRAM_API_HASH": "${env:TELEGRAM_API_HASH}",
-        "TELEGRAM_SESSION": "${env:TELEGRAM_SESSION}"
-      }
-    }
-  }
-}
-```
-
-5. Keep a `mcp.json.local-dev` (or README snippet) for `node ${workspaceFolder}/mcp/dist/cli.js` during development.
-6. Tag git `v0.1.0` after publish (only if user asks for tag/commit).
-
-## Depends on
-
-- Prefer completing [01-env-wiring](01-env-wiring.md) first so published config includes `envFile`.
+1. `npm login` (or automation token)
+2. From `mcp/`: `npm publish --access public`
+3. Optionally point live [`mcp.json`](../mcp.json) at `npx -y cursor-telegram-mcp@0.1.0 bot|user` (keep local-dev snippet in README)
+4. Fix `repository.url` in `package.json` to the real git remote before publish
 
 ## Acceptance
 
-- `npx -y cursor-telegram-mcp@0.1.0 bot` starts stdio MCP.
-- `npm run smoke` still passes against local `dist` (dev) and optionally against npx.
+- [x] Package build/metadata ready (`prepublishOnly`, `files`)
+- [x] npx example config committed
+- [ ] Package visible on npm
+- [ ] `npx -y cursor-telegram-mcp@0.1.0 bot` starts stdio MCP
 
 ## Todos
 
-- [ ] Package metadata + `files` + `prepublishOnly`
-- [ ] Publish npm package
-- [ ] Switch `mcp.json` to npx; keep local-dev instructions
-- [ ] README install section update
+- [x] Package metadata + `files` + `prepublishOnly`
+- [ ] Publish npm package (`npm login` required)
+- [x] npx example config; local-dev remains default `mcp.json`
+- [x] README install section mentions npx example

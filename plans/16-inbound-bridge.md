@@ -1,36 +1,38 @@
 # 16 — Inbound bridge (Telegram → agent → reply)
 
+**Status: Scaffold** — dry-run poller only; SDK auto-reply not wired
+
 ## Goal
 
-Always-on (or scheduled) process: inbound Telegram message triggers a Cursor agent run and optionally replies.
+Always-on process: inbound Telegram → Cursor agent run → optional reply.
 
-## Why separate
+## Implemented (scaffold)
 
-MCP tools are pull-based inside a chat. Inbound automation needs a long-running worker + Cursor SDK (`Agent.prompt` / `Agent.create`) — not just plugin MCP.
+| Item | Location |
+| --- | --- |
+| Package | [`bridge/`](../bridge/) |
+| Dry-run long-poll | [`bridge/src/index.ts`](../bridge/src/index.ts) — bot `getUpdates` |
+| Allowlist | `BRIDGE_CHAT_ALLOWLIST` (comma chat ids); empty = allow none |
+| Auto-reply flag | `BRIDGE_AUTO_REPLY=true` logs stub only (needs `@cursor/sdk`) |
+| Docs | [`bridge/README.md`](../bridge/README.md) |
 
-## Approach
+## Remaining
 
-1. New package or `bridge/` service:
-   - Bot long-poll `getUpdates` **or** user `NewMessage` handler (teleproto events)
-   - Allowlist of chat ids
-   - On message → `Agent.prompt(...)` with cwd/repo config + MCP telegram servers inline for reply
-2. Config: `.env` with `CURSOR_API_KEY`, Telegram creds, allowlist, model id.
-3. Safety: default dry-run (log only); explicit `BRIDGE_AUTO_REPLY=true`.
-4. Document ToS / cost / privacy risks heavily.
-
-## Out of scope for bridge v0
-
-- Multi-tenant SaaS
-- Hosting MTProto session in Cursor Cloud VMs
+1. Add `@cursor/sdk` dependency
+2. On allowlisted message: `Agent.prompt(...)` (or create/send) with repo cwd + telegram MCP for reply
+3. `sendMessage` reply when `BRIDGE_AUTO_REPLY=true`
+4. Ops: systemd/launchd example
+5. Optional: user-account `NewMessage` path (MTProto) — still out of scope until bot path works
 
 ## Acceptance
 
-- Demo: message test bot → agent run logged → optional reply in same chat.
-- Allowlist blocks unknown chats.
+- [x] Dry-run logs inbound allowlisted messages
+- [ ] Live agent reply demo
+- [x] Empty allowlist blocks all chats
 
 ## Todos
 
-- [ ] Bridge scaffold + allowlist
+- [x] Bridge scaffold + allowlist
 - [ ] Cursor SDK one-shot integration
-- [ ] Dry-run vs auto-reply modes
-- [ ] Ops README (run with systemd/launchd)
+- [x] Dry-run vs auto-reply modes (stub)
+- [ ] Ops README (systemd/launchd)

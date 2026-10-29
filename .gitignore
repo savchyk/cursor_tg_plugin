@@ -16,6 +16,8 @@ temp/
 # Node / MCP package
 mcp/node_modules/
 mcp/dist/
+bridge/node_modules/
+bridge/dist/
 
 # Local Telegram session (never commit)
 .cursor-telegram/

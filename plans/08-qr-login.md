@@ -1,31 +1,34 @@
 # 08 — QR login (user account)
 
+**Status: Done**
+
 ## Goal
 
-Offer QR / “link desktop device” login as an alternative to phone+code for `telegram-user`.
+QR / “Link Desktop Device” login as an alternative to phone+code.
 
-## Approach
+## Implemented
 
-1. Research teleproto QR export login APIs (LoginToken / QR helpers — match current teleproto version).
-2. Tools:
-   - `start_qr_login` — returns QR payload or `tg://` URL / base64 PNG if feasible
-   - `complete_qr_login` — poll/finish; accept optional 2FA `password`
-3. Keep phone flow (`start_login` / `complete_login`) intact.
-4. Update `telegram-user-setup` skill with QR path.
-5. Session persistence unchanged (`~/.cursor-telegram/`).
+| Tool | Behavior |
+| --- | --- |
+| `start_qr_login` | teleproto `signInUserWithQrCode`; stores rotating `tg://login?token=…` on login state |
+| `complete_qr_login` | Poll status; optional 2FA `password` |
+| `cancel_login` | AbortController cancel |
+| `auth_status` | Exposes `qr_url` + `login_status` |
 
-## Risks
+Phone flow unchanged. Session still under `~/.cursor-telegram/`. Skills updated (`telegram-user-setup`).
 
-- MCP hosts may not render QR images well — always return a scannable URL/string fallback.
-- Telegram may still demand 2FA password after QR accept.
+## Note
+
+MCP hosts may not render QR images — tool returns scannable URL string (as planned).
 
 ## Acceptance
 
-- User can authorize without typing a phone code when QR succeeds.
-- `auth_status` shows authorized after completion.
+- [x] QR tools listed in smoke
+- [x] Skill documents QR path
+- [ ] Live scan verified on a real account (user machine)
 
 ## Todos
 
-- [ ] Implement QR start/complete against teleproto
-- [ ] Skill + README
-- [ ] Smoke: tools listed (no live Telegram required)
+- [x] Implement QR start/complete against teleproto
+- [x] Skill + README
+- [x] Smoke: tools listed

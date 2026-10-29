@@ -1,25 +1,25 @@
 # Improvement plans
 
-Execute these **one by one** in order unless a later plan is explicitly needed first.
+Track implementation in [STATUS.md](STATUS.md). Most plans are **done in-repo**; a few still need a human step (npm publish, Marketplace submit, bridge SDK).
 
-| # | Plan | Goal |
-| --- | --- | --- |
-| 01 | [env-wiring](01-env-wiring.md) | Make Bot/user secrets reliably available to Cursor MCP |
-| 02 | [npm-publish](02-npm-publish.md) | Publish `cursor-telegram-mcp` and use `npx` in `mcp.json` |
-| 03 | [setup-command](03-setup-command.md) | `/telegram-setup` command + setup checklist |
-| 04 | [media-tools](04-media-tools.md) | `send_photo` / `send_document` (bot + user) |
-| 05 | [message-actions](05-message-actions.md) | Reply, edit, delete, react |
-| 06 | [forum-topics](06-forum-topics.md) | List forum topics and send into a topic |
-| 07 | [bot-updates](07-bot-updates.md) | Clearer update ack / optional webhook notes |
-| 08 | [qr-login](08-qr-login.md) | QR login for `telegram-user` |
-| 09 | [send-guardrails](09-send-guardrails.md) | Resolve + confirm peer before every send |
-| 10 | [default-identity](10-default-identity.md) | Project rule for default bot vs user |
-| 11 | [resources-prompts](11-resources-prompts.md) | MCP resources/prompts (unread, draft reply) |
-| 12 | [integration-tests](12-integration-tests.md) | Mocked Bot API + user-client unit tests |
-| 13 | [flood-wait](13-flood-wait.md) | FloodWait / rate-limit handling (teleproto) |
-| 14 | [ci](14-ci.md) | GitHub Actions: build, smoke, validate |
-| 15 | [marketplace](15-marketplace.md) | Cursor Marketplace submission checklist |
-| 16 | [inbound-bridge](16-inbound-bridge.md) | Telegram → agent → reply (always-on bridge) |
-| 17 | [multi-bot](17-multi-bot.md) | Named multi-bot Bot API support |
+| # | Plan | Status | Goal |
+| --- | --- | --- | --- |
+| 01 | [env-wiring](01-env-wiring.md) | Done | Secrets via `.env` / home store for Cursor MCP |
+| 02 | [npm-publish](02-npm-publish.md) | Prep | Publish package; switch default `mcp.json` to `npx` |
+| 03 | [setup-command](03-setup-command.md) | Done | `/telegram-setup` checklist command |
+| 04 | [media-tools](04-media-tools.md) | Done | Photo/document send (bot + user) |
+| 05 | [message-actions](05-message-actions.md) | Done | Reply, edit, delete, react |
+| 06 | [forum-topics](06-forum-topics.md) | Done | List topics + send into topic |
+| 07 | [bot-updates](07-bot-updates.md) | Done | Ack updates + webhook recovery |
+| 08 | [qr-login](08-qr-login.md) | Done | QR login for user account |
+| 09 | [send-guardrails](09-send-guardrails.md) | Done | Resolve/confirm peer before send |
+| 10 | [default-identity](10-default-identity.md) | Done | Prefer bot unless user asks otherwise |
+| 11 | [resources-prompts](11-resources-prompts.md) | Done | Unread + draft-reply prompts/resources |
+| 12 | [integration-tests](12-integration-tests.md) | Done | `npm test` offline suite |
+| 13 | [flood-wait](13-flood-wait.md) | Done | FloodWait / 429 retry helper |
+| 14 | [ci](14-ci.md) | Done | GitHub Actions CI |
+| 15 | [marketplace](15-marketplace.md) | Polish | Ready to submit (human) |
+| 16 | [inbound-bridge](16-inbound-bridge.md) | Scaffold | Dry-run poller; SDK auto-reply TODO |
+| 17 | [multi-bot](17-multi-bot.md) | Done | Named bots via env |
 
-**Suggested first three:** `01` → `02` → `03` (usable install path), then pick feature plans (`04`–`11`) or quality (`12`–`14`) as needed.
+**Still open:** `02` (npm login + publish), `15` (submit), `16` (wire `@cursor/sdk`).

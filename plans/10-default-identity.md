@@ -1,24 +1,29 @@
 # 10 — Default identity rule
 
+**Status: Done**
+
 ## Goal
 
-Let a project set a default Telegram identity so the agent does not ask “bot or user?” every time.
+Project default so the agent does not ask “bot or user?” every time.
 
-## Approach
+## Implemented
 
-1. Add `rules/telegram-default-identity.mdc` with frontmatter `description` and guidance like:
-   - Default to `telegram-bot` for notifications
-   - Use `telegram-user` only when user says “my account” / “inbox” / etc.
-2. Allow override via a small project file `.cursor/telegram.json` or env `TELEGRAM_DEFAULT_IDENTITY=bot|user` read by skills (document only — MCP need not enforce).
-3. Update `telegram-mode-guide` to honor the rule when present.
+| Item | Location |
+| --- | --- |
+| Rule | [`rules/telegram-default-identity.mdc`](../rules/telegram-default-identity.mdc) — prefer **bot** |
+| Mode guide honors rule + env | [`skills/telegram-mode-guide/SKILL.md`](../skills/telegram-mode-guide/SKILL.md) |
+| Optional env | `TELEGRAM_DEFAULT_IDENTITY=bot\|user` in [`.env.example`](../.env.example) |
+
+Explicit user phrasing still overrides.
 
 ## Acceptance
 
-- With the rule enabled, agent picks bot for “send me a status ping” without asking.
-- Explicit user phrasing still overrides.
+- [x] Rule present with frontmatter
+- [x] Mode-guide documents override
+- [x] Validator passes
 
 ## Todos
 
-- [ ] Add rule file
-- [ ] Document override in mode-guide + README
-- [ ] Validate frontmatter
+- [x] Add rule file
+- [x] Document override in mode-guide + README
+- [x] Validate frontmatter

@@ -2,11 +2,19 @@
   "name": "telegram",
   "displayName": "Telegram",
   "version": "0.1.0",
-  "description": "Connect Cursor agents to Telegram as a bot and/or your personal account via MCP.",
+  "description": "Connect Cursor agents to Telegram as a bot and/or your personal account via dual MCP servers.",
   "author": {
     "name": "cursor_tg_plugin"
   },
   "license": "MIT",
-  "keywords": ["cursor", "plugin", "mcp", "telegram", "bot", "messaging"],
+  "keywords": [
+    "cursor",
+    "plugin",
+    "mcp",
+    "telegram",
+    "bot",
+    "messaging",
+    "mtproto"
+  ],
   "logo": "assets/logo.svg"
 }

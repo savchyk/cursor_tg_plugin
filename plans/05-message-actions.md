@@ -1,41 +1,40 @@
 # 05 — Message actions (reply, edit, delete, react)
 
+**Status: Done**
+
 ## Goal
 
-Beyond plain send: reply to a message, edit, delete, and react — bot and user where the API allows.
+Reply, edit, delete, and react — bot and user.
 
-## Bot API
+## Implemented
 
-| Tool | Telegram method |
+### Bot
+
+| Tool / param | Notes |
 | --- | --- |
-| `send_message` enhancement | `reply_to_message_id` |
+| `send_message.reply_to_message_id` | Thread reply |
 | `edit_message_text` | `editMessageText` |
-| `delete_message` | `deleteMessage` |
-| `set_message_reaction` | `setMessageReaction` (API support permitting) |
+| `delete_message` | Destructive; skill says confirm |
+| `set_message_reaction` | Emoji reaction |
 
-## User account
+### User
 
-| Tool | Notes |
+| Tool / param | Notes |
 | --- | --- |
-| `send_message` + `reply_to` | teleproto reply-to message id |
-| `edit_message` | edit own messages |
-| `delete_message` | delete for self / revoke when allowed |
-| `send_reaction` | emoji reaction on a message |
-
-## Design notes
-
-- Require `chat_id`/`target` + `message_id` for edit/delete/react.
-- Skill update: confirm destructive deletes.
-- Keep tool descriptions prefixed.
+| `send_message.reply_to` | teleproto reply |
+| `edit_message` | Edit own message |
+| `delete_message` | Optional `revoke` |
+| `send_reaction` | `messages.SendReaction` |
 
 ## Acceptance
 
-- Agent can reply in-thread and edit/delete with explicit ids from `get_messages` / `get_updates`.
-- README updated.
+- [x] Reply/edit/delete/react available on both servers
+- [x] Skills warn on delete
+- [x] Smoke tool list includes new names
 
 ## Todos
 
-- [ ] Bot reply param + edit/delete/react tools
-- [ ] User reply/edit/delete/react tools
-- [ ] Skills + README
-- [ ] Smoke tool list update
+- [x] Bot reply param + edit/delete/react tools
+- [x] User reply/edit/delete/react tools
+- [x] Skills + README
+- [x] Smoke tool list update

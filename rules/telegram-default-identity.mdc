@@ -1,0 +1,13 @@
+---
+description: Default Telegram identity for this project — prefer bot unless the user asks for personal account.
+---
+
+# Default Telegram identity
+
+When both `telegram-bot` and `telegram-user` MCP servers are available:
+
+- **Default to `telegram-bot`** for notifications, alerts, status pings, and CI-style messages.
+- Use **`telegram-user`** only when the user mentions personal inbox, “my account”, dialogs, or reading their chats.
+- If still unclear, ask once: bot or personal account?
+- Never send the same message via both servers.
+- Honor explicit overrides. Optional env `TELEGRAM_DEFAULT_IDENTITY=bot|user` or project note in chat wins over this default when stated.

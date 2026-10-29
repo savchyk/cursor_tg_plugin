@@ -7,16 +7,33 @@
     "cursor-telegram-mcp": "./dist/cli.js"
   },
   "main": "./dist/cli.js",
+  "files": [
+    "dist/**",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/cli.js",
-    "smoke": "node scripts/smoke-list-tools.mjs"
+    "smoke": "node scripts/smoke-list-tools.mjs",
+    "test": "npm run build && node --test test/**/*.test.mjs scripts/smoke-list-tools.mjs",
+    "prepublishOnly": "npm run build"
   },
   "engines": {
     "node": ">=18"
   },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/example/cursor_tg_plugin.git"
+  },
+  "keywords": [
+    "mcp",
+    "telegram",
+    "cursor",
+    "bot",
+    "mtproto"
+  ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.0",
     "teleproto": "^1.232.0",

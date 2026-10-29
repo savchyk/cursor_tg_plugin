@@ -1,28 +1,29 @@
 # 06 — Forum topics
 
+**Status: Done**
+
 ## Goal
 
 Support Telegram forum groups: list topics and send into a specific topic.
 
-## User account (primary)
+## Implemented
 
-- `list_forum_topics` — input: forum group id/title; output: topic ids + titles
-- Extend `send_message` (and media later) with optional `topic_id` / `reply_to_msg_id` for topic root
-- Mark forums in `list_dialogs` (`isForum` if available from teleproto dialog flags)
-
-## Bot API (secondary)
-
-- If the bot is in a forum: support `message_thread_id` on `send_message`
-- Document that topic discovery still needs updates or admin APIs
+| Item | Location |
+| --- | --- |
+| `is_forum` on dialogs/search | [`mcp/src/user/server.ts`](../mcp/src/user/server.ts) |
+| `list_forum_topics` | uses teleproto `client.getForumTopics` ([`mcp/src/user/client.ts`](../mcp/src/user/client.ts)) |
+| User send `topic_id` | maps to replyTo when no explicit reply |
+| Bot `message_thread_id` | on `send_message` / photo / document |
 
 ## Acceptance
 
-- From a known forum dialog, agent can list topics and send to one topic as the user.
-- Skill note in mode-guide / send skill.
+- [x] List topics for a forum peer
+- [x] Send into topic / thread id
+- [x] Skills mention forums in send skill
 
 ## Todos
 
-- [ ] Detect forum dialogs in `list_dialogs`
-- [ ] `list_forum_topics` (user)
-- [ ] `message_thread_id` / topic send params (user + bot)
-- [ ] Docs/skills
+- [x] Detect forum dialogs in `list_dialogs`
+- [x] `list_forum_topics` (user)
+- [x] `message_thread_id` / topic send params (user + bot)
+- [x] Docs/skills

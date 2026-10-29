@@ -1,25 +1,31 @@
 # 09 — Send guardrails
 
+**Status: Done**
+
 ## Goal
 
-Reduce accidental wrong-chat sends: always resolve and surface peer identity before sending.
+Reduce accidental wrong-chat sends.
 
-## Approach
+## Implemented
 
-1. Add `resolve_peer` tool on both servers (bot: validate chat via getChat if possible; user: reuse `resolvePeer`).
-2. Change send tools to accept optional `confirm_label` — if provided, server checks it matches resolved title/username or returns an error asking to confirm.
-3. Or: add `preview_send` tool that returns `{ peer, preview_text }` without sending; skill mandates preview → user OK → send.
-4. Update `send-telegram-message` skill to **require** resolve/preview step and explicit user confirmation in chat.
-5. Prefer ids over fuzzy title match for user `send_message` when multiple dialogs match (error listing candidates).
+| Mechanism | Detail |
+| --- | --- |
+| `resolve_peer` (bot) | `getChat` → id/label/username |
+| `resolve_peer` (user) | Candidates; `ambiguous: true` if multiple title matches |
+| `confirm_label` on send | Bot + user `send_message` refuses on mismatch |
+| Ambiguous titles | User resolve/send errors with candidate list (no silent pick) |
+| Skill | `send-telegram-message` requires resolve → confirm → send |
+
+No separate `preview_send` tool — resolve + confirm_label covers the intent.
 
 ## Acceptance
 
-- Ambiguous title match does not silently send.
-- Skill text requires confirmation of identity + recipient + body.
+- [x] Ambiguous title does not silently send
+- [x] Skill requires confirmation
 
 ## Todos
 
-- [ ] `resolve_peer` (bot + user)
-- [ ] Disambiguation errors on title match
-- [ ] Skill enforcement of preview/confirm
-- [ ] README safety section refresh
+- [x] `resolve_peer` (bot + user)
+- [x] Disambiguation errors on title match
+- [x] Skill enforcement of preview/confirm
+- [x] README safety section refresh

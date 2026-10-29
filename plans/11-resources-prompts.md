@@ -1,27 +1,30 @@
 # 11 — MCP resources & prompts
 
+**Status: Done**
+
 ## Goal
 
-Expose higher-level agent entry points beyond raw tools: unread summary and draft-reply prompts.
+Higher-level entry points: unread summary and draft-reply (no auto-send).
 
-## Approach
+## Implemented
 
-1. **Prompts** (MCP prompts):
-   - `unread-summary` — args: optional limit; instructions to call `list_dialogs` / `get_messages` and summarize
-   - `draft-reply` — args: `target`; fetch last messages and draft a reply (do not send until confirmed)
-2. **Resources** (optional):
-   - `telegram://user/me` — cached get_me JSON
-   - `telegram://bot/me` — bot get_me
-3. Register in bot and/or user servers via MCP SDK `server.prompt` / `server.resource`.
-4. Document in README how to invoke from Cursor.
+| Kind | Name | Server |
+| --- | --- | --- |
+| Prompt | `unread-summary` | bot + user |
+| Prompt | `draft-reply` | user (`target` arg) |
+| Resource | `telegram://bot/me` | bot |
+| Resource | `telegram://user/me` | user |
+
+Draft-reply prompt text forbids calling `send_message` until the user confirms.
 
 ## Acceptance
 
-- Prompts appear in MCP prompt list for at least `telegram-user`.
-- Draft-reply never sends without a separate `send_message` tool call.
+- [x] Prompts registered
+- [x] Draft path does not send by itself
+- [x] README mentions prompts/resources
 
 ## Todos
 
-- [ ] Implement prompts on user (and bot where useful)
-- [ ] Optional me resources
-- [ ] README
+- [x] Implement prompts on user (and bot where useful)
+- [x] Optional me resources
+- [x] README

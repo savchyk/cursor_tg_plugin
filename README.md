@@ -1,99 +1,64 @@
 # Telegram for Cursor
 
-Cursor plugin that connects agents (including Grok) to Telegram through **two** MCP servers:
+Cursor plugin with **two** MCP servers so agents (including Grok) can use Telegram as a **bot** and/or your **personal account**.
 
-| Server | Identity | Protocol | Auth |
-| --- | --- | --- | --- |
-| `telegram-bot` | Your @BotFather bot | HTTP Bot API | `TELEGRAM_BOT_TOKEN` |
-| `telegram-user` | Your personal account | MTProto (teleproto) | `TELEGRAM_API_ID` + `TELEGRAM_API_HASH` + login/session |
-
-Enable one or both. The agent chooses tools by server name; skill `telegram-mode-guide` explains when to use which.
+| Server | Identity | Auth |
+| --- | --- | --- |
+| `telegram-bot` | BotFather bot(s) | `TELEGRAM_BOT_TOKEN` / `TELEGRAM_BOT_<NAME>` / `~/.cursor-telegram/bot-token` |
+| `telegram-user` | Your account (MTProto) | `TELEGRAM_API_ID` + `TELEGRAM_API_HASH` + login/session |
 
 ## Quick start
 
-### 1. Build the MCP package
-
 ```bash
-cd mcp
-npm install
-npm run build
+cd mcp && npm install && npm run build
+cp .env.example .env   # from repo root; fill tokens
 ```
 
-### 2. Set credentials
+Open this repo in Cursor so [`mcp.json`](mcp.json) resolves `${workspaceFolder}` and loads `.env` via `envFile`. Reload MCP.
 
-**Bot:**
+Smoke: `/telegram-setup` command, or call `get_me` (bot) / `auth_status` (user).
 
-```bash
-export TELEGRAM_BOT_TOKEN="123456:ABC..."
-```
+### Cursor can’t see my token
 
-**User account** (from [my.telegram.org](https://my.telegram.org)):
+1. Use a workspace `.env` (not only shell `export` — GUI Cursor often lacks those).
+2. Confirm `mcp.json` includes `"envFile": "${workspaceFolder}/.env"`.
+3. Quit and reopen Cursor.
+4. Or call `save_bot_token` / `save_api_credentials`.
+5. Verify with `list_bots` / `auth_status`.
 
-```bash
-export TELEGRAM_API_ID="1234567"
-export TELEGRAM_API_HASH="your_api_hash"
-# optional after first login:
-# export TELEGRAM_SESSION="..."
-```
+### Portable install (after npm publish)
 
-### 3. Load MCP in Cursor
+See [`mcp.json.npx.example`](mcp.json.npx.example) (`npx -y cursor-telegram-mcp@0.1.0 bot|user`). Until published, use the local `node …/mcp/dist/cli.js` config.
 
-[`mcp.json`](mcp.json) registers both servers against `${workspaceFolder}/mcp/dist/cli.js`. Open this repo in Cursor (or copy the `mcpServers` block into `~/.cursor/mcp.json` with an absolute path), ensure the env vars are available to Cursor, then reload MCP.
+## Tools (summary)
 
-### 4. Smoke-test
+**Bot:** `list_bots`, `get_me`, `resolve_peer`, `send_message` / `send_photo` / `send_document`, edit/delete/react, `get_updates`, `acknowledge_updates`, `list_recent_chats`, webhook helpers.
 
-- Bot: call `get_me` on `telegram-bot`
-- User: call `auth_status` → `start_login` → `complete_login` → `get_me` on `telegram-user`
+**User:** credentials + phone/QR login, `resolve_peer`, dialogs/search/forum topics, `get_messages`, send text/photo/document, edit/delete/react.
 
-## Tools
+Prompts: `unread-summary`, `draft-reply`. Resources: `telegram://bot/me`, `telegram://user/me`.
 
-### `telegram-bot`
+## Skills & rules
 
-| Tool | Purpose |
-| --- | --- |
-| `get_me` | Verify token / bot username |
-| `send_message` | Send text as the bot |
-| `get_updates` | Recent inbound updates |
-| `list_recent_chats` | Chats derived from updates |
+- Skills: mode guide, bot/user setup, send confirmation
+- Rule: `telegram-default-identity` (prefer bot unless asked for personal account)
+- Command: `telegram-setup`
 
-### `telegram-user`
-
-| Tool | Purpose |
-| --- | --- |
-| `save_api_credentials` | Persist api_id / api_hash locally |
-| `auth_status` | Credentials + authorization state |
-| `start_login` / `complete_login` | Phone + code (+ optional 2FA) |
-| `get_me` | Logged-in user |
-| `list_dialogs` / `search_dialogs` | Inbox / dialog search |
-| `get_messages` | Recent history |
-| `send_message` | Send text as the user |
-
-## Skills
-
-- `telegram-mode-guide` — bot vs user
-- `telegram-bot-setup` — BotFather + token
-- `telegram-user-setup` — my.telegram.org + login
-- `send-telegram-message` — confirm identity/recipient before send
-
-## Layout
-
-```text
-.cursor-plugin/plugin.json   # marketplace plugin manifest
-mcp.json                     # dual MCP server registration
-mcp/                         # TypeScript MCP package
-skills/                      # agent skills
-assets/logo.svg
-```
-
-## Validate
+## Develop
 
 ```bash
+cd mcp && npm test          # unit + listTools smoke
 node scripts/validate-template.mjs
 ```
 
-## Security notes
+CI: `.github/workflows/ci.yml`.
 
-- Treat bot tokens, api_hash, and session strings as secrets.
-- User session data defaults to `~/.cursor-telegram/` (mode `0700` / files `0600`).
-- Prefer confirming every outbound `send_message` in chat.
-- Personal-account automation should stay low-volume and personal-use only.
+Optional inbound worker scaffold: [`bridge/`](bridge/).
+
+## Security
+
+Treat tokens, api_hash, and sessions as secrets. Default data dir `~/.cursor-telegram/` (0700/0600). Confirm every outbound send. User-account automation should stay personal and low-volume.
+
+## Marketplace
+
+Plugin manifest: [`.cursor-plugin/plugin.json`](.cursor-plugin/plugin.json). Validate, publish npm package, then submit per current Cursor Marketplace process.

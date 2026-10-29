@@ -1,28 +1,30 @@
 # 03 — Setup command / checklist
 
+**Status: Done**
+
 ## Goal
 
-Add a Cursor command that walks the user through bot and/or user-account setup and smoke tests.
+Cursor command that walks bot and/or user-account setup and smoke tests without sending messages.
 
-## Approach
+## Implemented
 
-1. Add `commands/telegram-setup.md` with frontmatter `name` + `description`.
-2. Command body should instruct the agent to:
-   - Ask which mode(s): bot, user, or both
-   - Follow existing skills (`telegram-bot-setup`, `telegram-user-setup`)
-   - Call `get_me` / `auth_status` and report pass/fail
-   - Stop before any `send_message` unless user asks
-3. Optionally add `agents/telegram-setup.md` for a dedicated setup agent.
-4. Link from README “Quick start”.
+| Item | Location |
+| --- | --- |
+| Setup command | [`commands/telegram-setup.md`](../commands/telegram-setup.md) |
+| Linked from README quick start | [`README.md`](../README.md) |
+| Uses existing setup skills | `telegram-bot-setup`, `telegram-user-setup` |
+
+No separate setup agent was added (command + skills are enough).
 
 ## Acceptance
 
-- Invoking the command produces a clear checklist and uses MCP tools for verification.
-- No automatic outbound messages during setup.
+- [x] Command with `name` + `description` frontmatter
+- [x] Instructs no `send_message` during setup
+- [x] Validator passes
 
 ## Todos
 
-- [ ] `commands/telegram-setup.md`
-- [ ] Optional setup agent
-- [ ] README link
-- [ ] Validate frontmatter via `scripts/validate-template.mjs`
+- [x] `commands/telegram-setup.md`
+- [x] Skipped optional setup agent (not needed)
+- [x] README link
+- [x] Validate frontmatter via `scripts/validate-template.mjs`
