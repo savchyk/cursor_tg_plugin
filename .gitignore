@@ -12,3 +12,10 @@
 *.log
 tmp/
 temp/
+
+# Node / MCP package
+mcp/node_modules/
+mcp/dist/
+
+# Local Telegram session (never commit)
+.cursor-telegram/
