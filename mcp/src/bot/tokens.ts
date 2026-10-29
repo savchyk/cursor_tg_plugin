@@ -1,6 +1,11 @@
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import {
+  credentialSource,
+  getRequestCredentials,
+  setupGuideText,
+} from "../shared/requestContext.js";
 
 function dataDir(): string {
   return (
@@ -25,6 +30,13 @@ export async function readHomeBotToken(): Promise<string | undefined> {
 }
 
 export async function writeHomeBotToken(token: string): Promise<string> {
+  const src = credentialSource();
+  if (src === "header" || process.env.MCP_OPEN_HOSTED?.trim() === "true") {
+    throw new Error(
+      "This MCP host is stateless and does not store tokens. " +
+        "Keep the BotFather token in Grok Bot vault as header x-telegram-bot-token (sent every request)."
+    );
+  }
   const dir = dataDir();
   await fs.mkdir(dir, { recursive: true, mode: 0o700 });
   try {
@@ -42,15 +54,7 @@ export async function writeHomeBotToken(token: string): Promise<string> {
   return file;
 }
 
-/**
- * Registry of bots from env:
- * - TELEGRAM_BOT_TOKEN → name "default"
- * - TELEGRAM_BOT_<NAME>=token → lowercased name
- * - home bot-token file → "default" if not otherwise set
- */
-export async function loadBotRegistry(): Promise<Map<string, string>> {
-  const map = new Map<string, string>();
-
+function mergeRegistryFromEnv(map: Map<string, string>): void {
   for (const [key, value] of Object.entries(process.env)) {
     if (!value?.trim()) continue;
     if (key === "TELEGRAM_BOT_TOKEN") {
@@ -62,26 +66,78 @@ export async function loadBotRegistry(): Promise<Map<string, string>> {
       map.set(m[1].toLowerCase(), value.trim());
     }
   }
+}
 
-  if (!map.has("default")) {
-    const home = await readHomeBotToken();
-    if (home) map.set("default", home);
+function mergeRegistryFromRequest(map: Map<string, string>): void {
+  const ctx = getRequestCredentials();
+  if (ctx.botToken?.trim()) {
+    map.set("default", ctx.botToken.trim());
+  }
+  if (ctx.bots) {
+    for (const [name, token] of Object.entries(ctx.bots)) {
+      if (token?.trim()) map.set(name.toLowerCase(), token.trim());
+    }
+  }
+}
+
+/**
+ * Registry of bots:
+ * - Request headers / Grok Bot vault (per-user) when MCP_CREDENTIALS includes header
+ * - Env TELEGRAM_BOT_TOKEN / TELEGRAM_BOT_<NAME> when MCP_CREDENTIALS includes env
+ * - home bot-token file (env mode only)
+ */
+export async function loadBotRegistry(): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  const src = credentialSource();
+
+  if (src === "header" || src === "both") {
+    mergeRegistryFromRequest(map);
+  }
+  if (src === "env" || src === "both") {
+    mergeRegistryFromEnv(map);
+    if (!map.has("default")) {
+      const home = await readHomeBotToken();
+      if (home) map.set("default", home);
+    }
   }
 
   return map;
 }
 
-export async function resolveBotToken(bot?: string): Promise<{ name: string; token: string }> {
+export async function resolveBotToken(
+  bot?: string
+): Promise<{ name: string; token: string }> {
   const registry = await loadBotRegistry();
   const name = (bot?.trim() || "default").toLowerCase();
   const token = registry.get(name);
   if (!token) {
     const available = [...registry.keys()];
+    if (available.length === 0) {
+      throw new Error(setupGuideText("bot"));
+    }
     throw new Error(
-      available.length === 0
-        ? "No bot token configured. Set TELEGRAM_BOT_TOKEN, TELEGRAM_BOT_<NAME>, or save ~/.cursor-telegram/bot-token."
-        : `Unknown bot "${name}". Available: ${available.join(", ")}`
+      `Unknown bot "${name}". Available: ${available.join(", ")}`
     );
   }
   return { name, token };
+}
+
+export function botCredentialsStatus(): {
+  source: string;
+  bots_configured: string[];
+  from_request: boolean;
+  from_env_hint: boolean;
+} {
+  const ctx = getRequestCredentials();
+  const fromRequest = Boolean(
+    ctx.botToken?.trim() ||
+      (ctx.bots && Object.keys(ctx.bots).length > 0)
+  );
+  const fromEnv = Boolean(process.env.TELEGRAM_BOT_TOKEN?.trim());
+  return {
+    source: credentialSource(),
+    bots_configured: [], // filled async by caller via loadBotRegistry
+    from_request: fromRequest,
+    from_env_hint: fromEnv,
+  };
 }

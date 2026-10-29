@@ -19,6 +19,11 @@ import {
   withUserFlood,
 } from "./client.js";
 import {
+  credentialSource,
+  getRequestCredentials,
+  setupGuideText,
+} from "../shared/requestContext.js";
+import {
   readStore,
   resolveCredentials,
   saveCredentials,
@@ -60,8 +65,55 @@ export function createUserMcpServer(): McpServer {
   });
 
   server.tool(
+    "credentials_status",
+    "[User account] Whether API credentials/session are available (env and/or Grok Bot vault). Does not reveal secrets.",
+    {},
+    async () => {
+      try {
+        const ctx = getRequestCredentials();
+        let credentialsOk = false;
+        try {
+          await resolveCredentials();
+          credentialsOk = true;
+        } catch {
+          credentialsOk = false;
+        }
+        return textResult(
+          JSON.stringify(
+            {
+              credential_source: credentialSource(),
+              open_hosted: process.env.MCP_OPEN_HOSTED?.trim() === "true",
+              credentials_present: credentialsOk,
+              vault_headers_present: {
+                api_id: Boolean(ctx.apiId),
+                api_hash: Boolean(ctx.apiHash),
+                session: Boolean(ctx.session),
+              },
+              stores_credentials_on_host: false,
+              next_step: credentialsOk
+                ? "Call auth_status / get_me."
+                : "Call setup_guide and save vault headers (sent every request; not stored on this host).",
+            },
+            null,
+            2
+          )
+        );
+      } catch (err) {
+        return textResult(formatError(err), true);
+      }
+    }
+  );
+
+  server.tool(
+    "setup_guide",
+    "[User account] How to provide credentials via Grok Bot vault headers or Cursor env. Use when auth is missing.",
+    {},
+    async () => textResult(setupGuideText("user"))
+  );
+
+  server.tool(
     "save_api_credentials",
-    "[User account] Store api_id and api_hash from https://my.telegram.org under ~/.cursor-telegram (0600).",
+    "[User account] Store api_id and api_hash from https://my.telegram.org under ~/.cursor-telegram (0600). Disabled on open hosted (use vault headers).",
     {
       api_id: z.number().int().positive(),
       api_hash: z.string().min(8),

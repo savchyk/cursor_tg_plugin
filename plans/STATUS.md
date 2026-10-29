@@ -22,6 +22,7 @@ Last updated: 2026-10-29
 | 16 | inbound-bridge | **Scaffold** | [`bridge/`](../bridge/) dry-run `getUpdates` + allowlist; `@cursor/sdk` reply not wired |
 | 17 | multi-bot | **Done** | `TELEGRAM_BOT_<NAME>`, `list_bots`, optional `bot` arg on bot tools |
 | 18 | grok-bot-http | **Done** | Streamable HTTP + Docker; Cursor stdio unchanged. See [`docs/grok-bot.md`](../docs/grok-bot.md) |
+| 19 | grok-vault-credentials | **Done** | Open hosted **stateless**: vault headers every request; host stores nothing |
 
 ## Verify locally
 

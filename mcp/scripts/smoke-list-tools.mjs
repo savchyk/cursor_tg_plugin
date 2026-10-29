@@ -29,6 +29,7 @@ async function listTools(mode) {
 
 const expectBot = [
   "acknowledge_updates",
+  "credentials_status",
   "delete_message",
   "delete_webhook",
   "edit_message_text",
@@ -43,6 +44,7 @@ const expectBot = [
   "send_message",
   "send_photo",
   "set_message_reaction",
+  "setup_guide",
 ];
 
 const expectUser = [
@@ -50,6 +52,7 @@ const expectUser = [
   "cancel_login",
   "complete_login",
   "complete_qr_login",
+  "credentials_status",
   "delete_message",
   "edit_message",
   "get_me",
@@ -63,6 +66,7 @@ const expectUser = [
   "send_message",
   "send_photo",
   "send_reaction",
+  "setup_guide",
   "start_login",
   "start_qr_login",
 ];

@@ -60,17 +60,18 @@ CI: `.github/workflows/ci.yml`.
 
 Optional inbound worker scaffold: [`bridge/`](bridge/).
 
-## Grok Bot (self-host)
+## Grok Bot (self-host or open hosted)
 
-Cursor stdio is separate. To use the **same tools** from the Grok Bot app, run HTTP and expose HTTPS:
+Cursor stdio is separate. For the **Grok Bot app**, run HTTP and expose HTTPS.
+
+**Open hosted (stateless multi-user):** users save `x-telegram-bot-token` in **Grok Bot vault**. Grok sends it on **every** request; the MCP host **does not store** tokens.
 
 ```bash
 cd mcp && npm run build
-MCP_AUTH_TOKEN=… MCP_MODE=bot npm run start:http
-# or: docker compose up -d --build
+MCP_OPEN_HOSTED=true MCP_CREDENTIALS=header MCP_MODE=bot npm run start:http
 ```
 
-Then in Grok Bot: add custom MCP `https://YOUR-HOST/mcp/bot` with your bearer token. Full guide: [`docs/grok-bot.md`](docs/grok-bot.md).
+In Grok Bot: add `https://YOUR-HOST/mcp/bot` → Bot runs `setup_guide` → user **Save securely**. Skill: `grok-bot-telegram-setup`. Guide: [`docs/grok-bot.md`](docs/grok-bot.md).
 
 ## Security
 

@@ -22,5 +22,6 @@ Track implementation in [STATUS.md](STATUS.md). Most plans are **done in-repo**;
 | 16 | [inbound-bridge](16-inbound-bridge.md) | Scaffold | Dry-run poller; SDK auto-reply TODO |
 | 17 | [multi-bot](17-multi-bot.md) | Done | Named bots via env |
 | 18 | [grok-bot-http](18-grok-bot-http.md) | Done | Grok Bot HTTPS self-host (stdio kept) |
+| 19 | [grok-vault-credentials](19-grok-vault-credentials.md) | Done | Vault headers for open hosted multi-user |
 
 **Still open:** `02` (npm login + publish), `15` (submit), `16` (wire `@cursor/sdk`).

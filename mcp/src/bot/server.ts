@@ -9,6 +9,11 @@ import {
   type TelegramUpdate,
   type TelegramUser,
 } from "./api.js";
+import {
+  credentialSource,
+  getRequestCredentials,
+  setupGuideText,
+} from "../shared/requestContext.js";
 import { loadBotRegistry, writeHomeBotToken } from "./tokens.js";
 
 const botName = z
@@ -31,6 +36,47 @@ export function createBotMcpServer(): McpServer {
     name: "telegram-bot",
     version: "0.1.0",
   });
+
+  server.tool(
+    "credentials_status",
+    "[Bot API] Check whether a bot token is available for this request (env and/or Grok Bot vault headers). Does not reveal the token.",
+    {},
+    async () => {
+      try {
+        const registry = await loadBotRegistry();
+        const ctx = getRequestCredentials();
+        return textResult(
+          JSON.stringify(
+            {
+              credential_source: credentialSource(),
+              open_hosted: process.env.MCP_OPEN_HOSTED?.trim() === "true",
+              bots: [...registry.keys()],
+              vault_headers_present: {
+                bot_token: Boolean(ctx.botToken),
+              },
+              stores_credentials_on_host: false,
+              ready: registry.size > 0,
+              next_step:
+                registry.size > 0
+                  ? "Call get_me to smoke-test."
+                  : "Call setup_guide and save x-telegram-bot-token in Grok Bot vault (sent every request; not stored here).",
+            },
+            null,
+            2
+          )
+        );
+      } catch (err) {
+        return textResult(formatError(err), true);
+      }
+    }
+  );
+
+  server.tool(
+    "setup_guide",
+    "[Bot API] Instructions for Cursor env setup OR Grok Bot vault headers. Use when credentials are missing or the user asks how to connect Telegram.",
+    {},
+    async () => textResult(setupGuideText("bot"))
+  );
 
   server.tool(
     "list_bots",
@@ -539,6 +585,23 @@ export function createBotMcpServer(): McpServer {
         return textResult(formatError(err), true);
       }
     }
+  );
+
+  server.prompt(
+    "setup-telegram-credentials",
+    "Guide the user to save Telegram bot credentials in Grok Bot vault (never in chat)",
+    {},
+    async () => ({
+      messages: [
+        {
+          role: "user" as const,
+          content: {
+            type: "text" as const,
+            text: "Call telegram-bot setup_guide and credentials_status. Guide the user to Save securely header x-telegram-bot-token. The MCP host does not store the token — Grok sends it each request. Do not ask them to paste the token into chat. Then get_me.",
+          },
+        },
+      ],
+    })
   );
 
   server.prompt(

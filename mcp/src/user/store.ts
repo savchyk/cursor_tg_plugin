@@ -1,6 +1,11 @@
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import {
+  credentialSource,
+  getRequestCredentials,
+  setupGuideText,
+} from "../shared/requestContext.js";
 
 export type StoredCredentials = {
   apiId: number;
@@ -58,6 +63,13 @@ export async function saveCredentials(
   apiId: number,
   apiHash: string
 ): Promise<void> {
+  const src = credentialSource();
+  if (src === "header" || process.env.MCP_OPEN_HOSTED?.trim() === "true") {
+    throw new Error(
+      "This MCP host is stateless: it does not store credentials. " +
+        "Save x-telegram-api-id and x-telegram-api-hash in Grok Bot vault (headers sent every request)."
+    );
+  }
   const existing = await readStore();
   await writeStore({
     ...existing,
@@ -67,6 +79,12 @@ export async function saveCredentials(
 }
 
 export async function saveSession(session: string): Promise<void> {
+  const src = credentialSource();
+  if (src === "header" || process.env.MCP_OPEN_HOSTED?.trim() === "true") {
+    // Stateless: do not write session (or anything) on the host.
+    void session;
+    return;
+  }
   const existing = await readStore();
   await writeStore({
     ...existing,
@@ -75,23 +93,42 @@ export async function saveSession(session: string): Promise<void> {
 }
 
 export async function resolveCredentials(): Promise<StoredCredentials> {
-  const store = await readStore();
-  const envId = process.env.TELEGRAM_API_ID?.trim();
-  const envHash = process.env.TELEGRAM_API_HASH?.trim();
+  const src = credentialSource();
+  const ctx = getRequestCredentials();
+  const store = src === "header" ? {} : await readStore();
 
-  const apiId = envId ? Number(envId) : store.apiId;
-  const apiHash = envHash || store.apiHash;
+  let apiId: number | undefined;
+  let apiHash: string | undefined;
+
+  if (src === "header" || src === "both") {
+    if (ctx.apiId && ctx.apiHash) {
+      apiId = ctx.apiId;
+      apiHash = ctx.apiHash;
+    }
+  }
+  if ((src === "env" || src === "both") && (!apiId || !apiHash)) {
+    const envId = process.env.TELEGRAM_API_ID?.trim();
+    const envHash = process.env.TELEGRAM_API_HASH?.trim();
+    apiId = envId ? Number(envId) : store.apiId;
+    apiHash = envHash || store.apiHash;
+  }
 
   if (!apiId || Number.isNaN(apiId) || !apiHash) {
-    throw new Error(
-      "Missing Telegram API credentials. Set TELEGRAM_API_ID and TELEGRAM_API_HASH (from https://my.telegram.org) or call save_api_credentials."
-    );
+    throw new Error(setupGuideText("user"));
   }
 
   return { apiId, apiHash };
 }
 
 export async function resolveSessionString(): Promise<string> {
+  const src = credentialSource();
+  const ctx = getRequestCredentials();
+  if ((src === "header" || src === "both") && ctx.session?.trim()) {
+    return ctx.session.trim();
+  }
+  if (src === "header") {
+    return "";
+  }
   const envSession = process.env.TELEGRAM_SESSION?.trim();
   if (envSession) return envSession;
   const store = await readStore();

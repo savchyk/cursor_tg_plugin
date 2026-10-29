@@ -2,6 +2,10 @@ import { TelegramClient, Api } from "teleproto";
 import { StringSession } from "teleproto/sessions";
 import { withFloodRetry, type RetryOptions } from "../shared/retry.js";
 import {
+  getRequestCredentials,
+  isStatelessHost,
+} from "../shared/requestContext.js";
+import {
   resolveCredentials,
   resolveSessionString,
   saveSession,
@@ -32,7 +36,13 @@ export function getLoginState(): LoginState {
 }
 
 export async function getClient(connect = true): Promise<TelegramClient> {
-  if (client) {
+  // Stateless / vault-header requests: never reuse a process-wide client (no cross-user leak).
+  const req = getRequestCredentials();
+  const ephemeral =
+    isStatelessHost() ||
+    Boolean(req.apiId || req.apiHash || req.session);
+
+  if (!ephemeral && client) {
     if (connect && !client.connected) {
       await client.connect();
     }
@@ -41,17 +51,25 @@ export async function getClient(connect = true): Promise<TelegramClient> {
 
   const { apiId, apiHash } = await resolveCredentials();
   const session = new StringSession(await resolveSessionString());
-  client = new TelegramClient(session, apiId, apiHash, {
+  const created = new TelegramClient(session, apiId, apiHash, {
     connectionRetries: 5,
   });
 
   if (connect) {
-    await client.connect();
+    await created.connect();
   }
-  return client;
+
+  if (!ephemeral) {
+    client = created;
+  }
+  return created;
 }
 
 export async function persistClientSession(): Promise<void> {
+  if (isStatelessHost()) {
+    // Open hosted: Grok must send x-telegram-session on later requests — we store nothing.
+    return;
+  }
   if (!client) return;
   const saved = client.session.save() as unknown as string;
   if (saved) await saveSession(saved);
